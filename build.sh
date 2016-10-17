@@ -39,8 +39,10 @@ function build_libcurl()
 		exit 0
 	fi 
 	platform="iPhoneOS"
+	host="arm-apple-darwin"
 	if [ $arch == "x86_64" ]; then
 		platform="iPhoneSimulator"
+		host="x86_64-apple-darwin"
 	fi
 
 	echo -e "build libcurl with ${arch}"
@@ -50,7 +52,7 @@ function build_libcurl()
 	export LDFLAGS="-arch ${arch} -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/${platform}.platform/Developer/SDKs/${platform}.sdk"
 	export CC="clang"
 	export CXX="clang"
-	$source_path/configure -prefix="${target_path}/${arch}" --host=${arch}-apple-darwin \
+	$source_path/configure -prefix="${target_path}/${arch}" --host=${host} \
 						--enable-static --disable-shared \
 						--with-darwinssl \
 						--enable-threaded-resolver \
@@ -66,7 +68,7 @@ function build_libcurl()
 						--disable-tftp \
 						--disable-gopher \
 						--disable-dict
-	make 
+	make -j 2
 	make install
 	make distclean
 	popd > /dev/null
