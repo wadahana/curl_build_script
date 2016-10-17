@@ -80,14 +80,6 @@ mkdir -p "${target_path}"
 
 build_libcurl armv7
 build_libcurl arm64
-build_libcurl x86_86
+build_libcurl x86_64
 
-lipo -create "${target_path}/armv7/lib/libcurl.a" "${target_path}/arm64/lib/libcurl.a" "${target_path}/x86_64/lib/libcurl.a" "${path}/libcurl.a"
-
-#arch_list=(armv7 armv7s arm64 i386 x86_64)
-#for (( i=0; i<${#ARCHS[@]}; i++ )); do
-#	build_libcurl ${ARCHS[$i]}
-#done
-
-
-#lipo -create ${CURRENTDIR}/wspx/Build/${SCHEME}-iphoneos/libWSPX.a ${CURRENTDIR}/wspx/Build/${SCHEME}-iphonesimulator/libWSPX.a -output ${CURRENTDIR}/wspx/Build/libWSPX_PUB.a
+lipo -create "${target_path}/armv7/lib/libcurl.a" "${target_path}/arm64/lib/libcurl.a" "${target_path}/x86_64/lib/libcurl.a" -o "${path}/libcurl.a"
