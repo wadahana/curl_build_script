@@ -19,6 +19,7 @@ if [ ! -d "$source_path" ]; then
 fi
 pushd "$source_path" > /dev/null
 git checkout 
+git reset --hard HEAD
 if [ ! -f "buildconf" ]; then
 	echo -e "git clone ${curl_git_ur} fail.."
 	exit 0
@@ -28,7 +29,6 @@ if [ ! -f "configure" ]; then
 	./buildconf
 fi
 popd > /dev/null
-
 
 
 function build_libcurl() 
@@ -44,6 +44,12 @@ function build_libcurl()
 		platform="iPhoneSimulator"
 		host="x86_64-apple-darwin"
 	fi
+	
+	if [ -f "${build_path}/Makefile" ]; then
+	    pushd "${build_path}" > /dev/null
+        make distclean
+        popd
+	fi
 
 	echo -e "build libcurl with ${arch}"
 	pushd "${build_path}" > /dev/null
@@ -54,9 +60,11 @@ function build_libcurl()
 	export CXX="clang"
 	$source_path/configure -prefix="${target_path}/${arch}" --host=${host} \
 						--enable-static --disable-shared \
+						--disable-debug \
+						--disable-curldebug \
 						--with-darwinssl \
 						--enable-threaded-resolver \
-						--disable-verbose \
+						--enable-verbose \
 						--enable-ipv6 \
 						--disable-rtsp \
 						--disable-imap \
@@ -68,9 +76,12 @@ function build_libcurl()
 						--disable-tftp \
 						--disable-gopher \
 						--disable-dict
+
+
+	sed -i .config.bak 's/^#define HAVE_CLOCK_GETTIME_MONOTONIC 1/\/* #undef HAVE_CLOCK_GETTIME_MONOTONIC *\//g' ${build_path}/lib/curl_config.h
+
 	make -j 2
 	make install
-	make distclean
 	popd > /dev/null
 
 }
@@ -83,3 +94,8 @@ build_libcurl arm64
 build_libcurl x86_64
 
 lipo -create "${target_path}/armv7/lib/libcurl.a" "${target_path}/arm64/lib/libcurl.a" "${target_path}/x86_64/lib/libcurl.a" -o "${path}/libcurl.a"
+rm -r "${path}/include"
+cp -r "${target_path}/arm64/include/curl" "${path}/include"
+pushd "${path}/include" > /dev/null
+patch -p1 <../headers.patch 
+popd
