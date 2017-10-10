@@ -14,13 +14,13 @@ clang_path="${xcode_path}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
 
 echo -e "chekcout git ..."
 if [ ! -d "$source_path" ]; then
-    if [ ! "curl-7_51_0.zip" ]; then
-        echo -e "download curl-7_51_0.zip"
-        wget "https://github.com/curl/curl/archive/curl-7_51_0.zip"
+    if [ ! "curl-7_56_0.zip" ]; then
+        echo -e "download curl-7_56_0.zip"
+        wget "https://github.com/curl/curl/archive/curl-7_56_0.zip"
     fi
     echo -e "unzip ..."
-    unzip curl-7_51_0.zip 1>/dev/null
-    mv curl-curl-7_51_0 curl
+    unzip curl-7_56_0.zip 1>/dev/null
+    mv curl-curl-7_56_0 curl
 fi
 
 pushd "$source_path" > /dev/null
@@ -64,7 +64,7 @@ function build_libcurl()
 	export CXX="clang"
 	$source_path/configure -prefix="${target_path}/${arch}" --host=${host} \
 						--enable-static --enable-shared \
-						--disable-symbol-hiding \
+						--enable-symbol-hiding \
                         --disable-debug \
 						--disable-curldebug \
 						--with-darwinssl \
@@ -84,8 +84,8 @@ function build_libcurl()
 						--disable-dict
 
 
-	sed -i .config.bak 's/^#define HAVE_CLOCK_GETTIME_MONOTONIC 1/\/* #undef HAVE_CLOCK_GETTIME_MONOTONIC *\//g' ${build_path}/lib/curl_config.h
-
+	sed -i .bak.1 's/^#define HAVE_CLOCK_GETTIME_MONOTONIC 1/\/* #undef HAVE_CLOCK_GETTIME_MONOTONIC *\//g' ${build_path}/lib/curl_config.h
+    sed -i .bak.2 's/^#define CURL_EXTERN_SYMBOL __attribute__ ((__visibility__ (\"default\")))/#define CURL_EXTERN_SYMBOL/g' ${build_path}/lib/curl_config.h 
 	make -j 2
 	make install
 	popd > /dev/null
