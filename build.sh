@@ -3,7 +3,6 @@
 path=$(cd "$(dirname "$0")"; pwd)
 echo -e "\t${path}"
 
-curl_git_url="https://github.com/curl/curl.git"
 source_path="${path}/curl"
 build_path="${path}/build"
 target_path="${path}/target"
@@ -15,13 +14,18 @@ clang_path="${xcode_path}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
 
 echo -e "chekcout git ..."
 if [ ! -d "$source_path" ]; then
-	git clone "$curl_git_url" "$source_path"  > /dev/null
+    if [ ! "curl-7_51_0.zip" ]; then
+        echo -e "download curl-7_51_0.zip"
+        wget "https://github.com/curl/curl/archive/curl-7_51_0.zip"
+    fi
+    echo -e "unzip ..."
+    unzip curl-7_51_0.zip 1>/dev/null
+    mv curl-curl-7_51_0 curl
 fi
+
 pushd "$source_path" > /dev/null
-git checkout 
-git reset --hard HEAD
 if [ ! -f "buildconf" ]; then
-	echo -e "git clone ${curl_git_ur} fail.."
+	echo -e "get curl source files fail!"
 	exit 0
 fi
 
@@ -59,14 +63,16 @@ function build_libcurl()
 	export CC="clang"
 	export CXX="clang"
 	$source_path/configure -prefix="${target_path}/${arch}" --host=${host} \
-						--enable-static --disable-shared \
-						--disable-debug \
+						--enable-static --enable-shared \
+						--disable-symbol-hiding \
+                        --disable-debug \
 						--disable-curldebug \
 						--with-darwinssl \
 						--enable-threaded-resolver \
 						--enable-verbose \
 						--enable-ipv6 \
-						--disable-rtsp \
+						--enable-tls-srp \
+                        --disable-rtsp \
 						--disable-imap \
 						--disable-smb \
 						--disable-telnet \
