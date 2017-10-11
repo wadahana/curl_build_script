@@ -2,7 +2,9 @@
 1. install config tools first
 
     brew install autoconf
+ 
     brew install automake
+ 
     brew install libtool
 
 2. run build.sh
