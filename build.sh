@@ -14,13 +14,13 @@ clang_path="${xcode_path}/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
 
 echo -e "chekcout git ..."
 if [ ! -d "$source_path" ]; then
-    if [ ! -f "curl-7_56_0.zip" ]; then
-        echo -e "download curl-7_56_0.zip"
-        wget "https://github.com/curl/curl/archive/curl-7_56_0.zip"
+    if [ ! -f "curl-7_51_0.zip" ]; then
+        echo -e "download curl-7_51_0.zip"
+        wget "https://github.com/curl/curl/archive/curl-7_51_0.zip"
     fi
     echo -e "unzip ..."
-    unzip curl-7_56_0.zip 1>/dev/null
-    mv curl-curl-7_56_0 curl
+    unzip curl-7_51_0.zip 1>/dev/null
+    mv curl-curl-7_51_0 curl
 fi
 
 pushd "$source_path" > /dev/null
@@ -86,8 +86,8 @@ function build_libcurl()
 
     sed -i .bak 's/^#define HAVE_CLOCK_GETTIME_MONOTONIC 1/\/* #undef HAVE_CLOCK_GETTIME_MONOTONIC *\//g' ${build_path}/lib/curl_config.h
     sed -i .bak 's/^#define CURL_EXTERN_SYMBOL __attribute__ ((__visibility__ (\"default\")))/#define CURL_EXTERN_SYMBOL/g' ${build_path}/lib/curl_config.h 
-	sed -i .bak 's/curl_jmpenv/wspx_curl_jmpenv/g' ${source_path}/lib/hostip.c
-    sed -i .bak 's/curl_jmpenv/wspx_curl_jmpenv/g' ${source_path}/lib/hostip.h
+	sed -i .bak 's/curl_jmpenv/wspx_curl__jmpenv/g' ${source_path}/lib/hostip.c
+    sed -i .bak 's/curl_jmpenv/wspx_curl__jmpenv/g' ${source_path}/lib/hostip.h
 
     make -j 2
 	make install
@@ -98,10 +98,10 @@ function build_libcurl()
 mkdir -p "${build_path}"
 mkdir -p "${target_path}"
 
-build_libcurl armv7
+#build_libcurl armv7
 build_libcurl arm64
-build_libcurl x86_64
-
+#build_libcurl x86_64
+exit 0
 lipo -create "${target_path}/armv7/lib/libcurl.a" "${target_path}/arm64/lib/libcurl.a" "${target_path}/x86_64/lib/libcurl.a" -o "${path}/libcurl.a"
 rm -r "${path}/include"
 cp -r "${target_path}/arm64/include/curl" "${path}/include"
